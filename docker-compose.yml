@@ -1,0 +1,40 @@
+version: '2'
+
+services:
+  influx:
+    image: tutum/influxdb:0.12
+    ports:
+      - 8083:8083
+      - 8086:8086
+      - 8090:8090
+      - 8099:8099
+    environment:
+      PRE_CREATE_DB: "influxdb"
+  es:
+    build: ./es
+    ports:
+      - 9200:9200
+    environment:
+      ELASTICSEARCH_USER: admin
+      ELASTICSEARCH_PASS: mypass
+  grafana:
+    # build: ./grafana
+    # ports:
+    #  - 8080:80
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    links:
+      - influx:influx
+    environment:
+      INFLUXDB_HOST: influx
+      INFLUXDB_PORT: 8086
+      INFLUXDB_NAME: influxdb
+      INFLUXDB_USER: root
+      INFLUXDB_PASS: root
+      ELASTICSEARCH_HOST: es
+      ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_USER: admin
+      ELASTICSEARCH_PASS: mypass
+      GF_SERVER_ROOT_URL: http://docker
+      GF_SECURITY_ADMIN_PASSWORD: secret
