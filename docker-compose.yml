@@ -2,7 +2,7 @@ version: '2'
 
 services:
   influx:
-    image: tutum/influxdb:0.12
+    image: influxdb:0.13
     ports:
       - 8083:8083
       - 8086:8086
@@ -10,17 +10,31 @@ services:
       - 8099:8099
     environment:
       PRE_CREATE_DB: "influxdb"
+  fluent:
+    build: ./fluent
+    ports:
+      - 24224:24224
+    volumes:
+      - ./fluent/data:/fluentd/log
+      - ./fluent/etc:/fluentd/etc
+    links:
+      - es:es
   es:
-    build: ./es
+    image: elasticsearch:2.3.4
     ports:
       - 9200:9200
+    # environment:
+    #   ELASTICSEARCH_USER: admin
+    #   ELASTICSEARCH_PASS: mypass
+  kibana:
+    image: kibana:4.5.2
+    ports:
+      - 5601:5601
+    links:
+      - es:es
     environment:
-      ELASTICSEARCH_USER: admin
-      ELASTICSEARCH_PASS: mypass
+      - ELASTICSEARCH_URL=http://es:9200
   grafana:
-    # build: ./grafana
-    # ports:
-    #  - 8080:80
     image: grafana/grafana
     ports:
       - 3000:3000
